@@ -1,24 +1,117 @@
-import logo from './logo.svg';
-import './App.css';
+// Styling
+import "bootstrap/dist/css/bootstrap.min.css";
+import Home from "./components/Home";
+import { GlobalStyle, ThemeButton , NewNav, NewBar } from "./styles";
+
+// Components
+import ProductList from "./components/ProductList";
+import { ThemeProvider } from "styled-components";
+import { useState } from "react";
+import ProductDetail from "./components/ProductDetail";
+import products from "./products";
+
+import NavBar from "./components/NavBar";
+
+
+import { Route, Switch} from "react-router";
+
+import  NotFound from "./components/NotFound";
+
+
+
+const theme = {
+  light: {
+    mainColor: "#242424", // main font color
+    backgroundColor: "#fefafb", // main background color
+    pink: "#ff85a2",
+    red: "#ff3232",
+  },
+  dark: {
+    mainColor: "#fefafb", // main font color
+    backgroundColor: "#242424", // main background color
+    pink: "#ff85a2",
+    red: "#ff3232",
+  },
+};
 
 function App() {
+  const [_products, setProducts] = useState(products);
+  const deleteProduct = (productId) => {
+    const newProducts = _products.filter((product) => product.id !== productId);
+    setProducts(newProducts);
+  };
+
+  const [product, setProduct] = useState(null);
+
+  const setView = () => {
+    if (product)
+      return (
+
+        
+        <ProductDetail
+          products={products}
+          setProduct={setProduct}
+          deleteProduct={deleteProduct} />   
+
+      );
+    else
+      return (
+        <ProductList
+          setProduct={setProduct}
+          products={_products}
+          deleteProduct={deleteProduct}
+        />
+      );
+  };
+
+  const [currentTheme, setCurrentTheme] = useState("light");
+
+  const toggleTheme = () =>
+    setCurrentTheme(currentTheme === "light" ? "dark" : "light");
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme[currentTheme]}>
+
+      <GlobalStyle />
+
+      <NavBar currentTheme={currentTheme} toggleTheme={toggleTheme}/>
+      <ThemeButton onClick={toggleTheme}>
+        {currentTheme === "light" ? "Dark" : "Light"} Mode
+      </ThemeButton>
+      
+      {/* {setView()} */}
+           
+
+          <Switch>
+
+          <Route exact path="/trips/:tripsSlug">
+          <ProductDetail
+          products={products}
+          setProduct={setProduct}
+          deleteProduct={deleteProduct} /> 
+          </Route>
+           
+
+         <Route exact path="/trips">
+         <ProductList
+          setProduct={setProduct}
+          products={_products}
+          deleteProduct={deleteProduct} />
+          </Route>
+          
+
+          <Route exact path="/">
+          <Home />
+          </Route>
+
+
+          <Route>
+          <NotFound />
+          </Route>
+
+          </Switch>
+
+    </ThemeProvider>
   );
 }
 
